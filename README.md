@@ -3,9 +3,9 @@
 Travas e infraestrutura para usar agentes de código (Claude Code e Google Antigravity) em trabalho real:
 **onde cada agente pode escrever, o que ele fez, o que decidiu sozinho e quanto custou.**
 
-É o núcleo genérico de um harness privado que uso em produção na localização de jogos de clientes que permitem uso de IA no processo. Ele é composto por vários agentes
-(um tradutor e revisores em paralelo) trabalhando sobre arquivos de cliente. Tudo o que é do cliente ficou de
-fora. O projeto de demonstração deste repositório é inventado: não há jogo, cliente ou produto real.
+É o núcleo genérico do harness privado que uso no meu trabalho de localização de jogos: vários agentes (um
+tradutor e revisores em paralelo) trabalhando sobre os arquivos de cada projeto. O projeto de demonstração deste
+repositório é inventado: não há jogo, empresa ou produto real.
 
 Python 3.11+, só a biblioteca padrão. O código está em inglês; a documentação, em português.
 
@@ -124,6 +124,11 @@ arquitetura (ADRs) do harness de produção:
 4. [Sem supervisão, «pedir» vira «negar»](docs/decisions/0004-unattended-mode.md)
 5. [Decisões por inferência vão para uma fila de aprovação](docs/decisions/0005-decision-queue.md)
 6. [Uma regra fixa de junção no lugar de um juiz LLM](docs/decisions/0006-fixed-merge-rule.md)
+
+## Confidencialidade
+
+Este repositório não tem nenhum dado de trabalho real: o código é só o núcleo genérico, e a demo e os registros
+de decisão foram escritos com conteúdo inventado.
 
 ## Limites
 
