@@ -1,29 +1,29 @@
-# 2. One write-zone map, last match wins, default blocked
+# 2. Um mapa de zonas de escrita: vale a última zona, o resto é bloqueado
 
-Status: accepted
+Status: aceita
 
-## Context
-Protection rules had grown as separate lists inside each guard: protected references, protected databases,
-generated folders. Adding a folder meant editing code in several places, and nothing told an agent where a new
-file *could* go.
+## Contexto
+As regras de proteção tinham virado listas separadas dentro de cada trava: referências protegidas, bancos
+protegidos, pastas geradas. Uma pasta nova exigia mexer em código em vários lugares, e nada dizia ao agente
+onde um arquivo novo *podia* ficar.
 
-## Decision
-One TOML map (`.agents/tree.toml`) assigns each path one of six modes:
+## Decisão
+Um mapa em TOML (`.agents/tree.toml`) dá a cada caminho um de seis modos:
 
-| Mode | New file | Existing file |
+| Modo | Arquivo novo | Arquivo existente |
 |---|---|---|
-| `free` | allow | allow |
-| `deliver` | allow | ask |
-| `append` | allow | deny |
-| `ask` | ask | ask |
-| `script` | only the tool in `by` | only the tool in `by` |
-| `blocked` | deny | deny |
+| `free` | segue | segue |
+| `deliver` | segue | pede confirmação |
+| `append` | segue | nega |
+| `ask` | pede confirmação | pede confirmação |
+| `script` | só a ferramenta de `by` | só a ferramenta de `by` |
+| `blocked` | nega | nega |
 
-Globs are matched in order and the **last** match wins, so the map reads from the general rule to the exception
-(`references/**` blocked, then `references/glossary.csv` ask). Anything no zone covers falls into `default`,
-which is `blocked`: a new folder requires a new zone, approved by a human.
+Os globs são lidos em ordem e vale a **última** zona que casa, então o mapa vai da regra geral para a exceção
+(`references/**` bloqueado e, depois, `references/glossary.csv` com confirmação). O que nenhuma zona cobre cai
+no `default`, que é `blocked`: pasta nova exige zona nova, aprovada por um humano.
 
-## Consequences
-- The guard, `tools/tree.py check` (which lists files on disk outside the map) and the tests read the same file.
-- `append` makes logs and worker output tamper-proof for agents without any extra code.
-- `script` zones let a generator own its output: `.claude/skills/**` can only be written by `sync_adapters.py`.
+## Consequências
+- A trava, o `tools/tree.py check` (que lista o que existe no disco fora do mapa) e os testes leem o mesmo arquivo.
+- O modo `append` protege registros e saídas de worker contra os agentes sem nenhum código extra.
+- O modo `script` dá a um gerador a posse da sua saída: `.claude/skills/**` só é escrito pelo `sync_adapters.py`.

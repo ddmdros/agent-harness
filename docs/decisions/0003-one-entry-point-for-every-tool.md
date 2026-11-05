@@ -1,19 +1,20 @@
-# 3. One entry point for every agent tool
+# 3. Um ponto de entrada para todas as ferramentas
 
-Status: accepted
+Status: aceita
 
-## Context
-The same project is worked on with Claude Code and with Google Antigravity. Both offer PreToolUse hooks, with
-different event shapes and different answer protocols. Claude Code denies with exit code 2, while Antigravity
-expects JSON with `deny` or `force_ask`. Keeping two sets of guards would let the rules drift apart.
+## Contexto
+O mesmo projeto é trabalhado no Claude Code e no Google Antigravity. Os dois oferecem hooks PreToolUse, com
+eventos em formatos diferentes e protocolos de resposta diferentes. O Claude Code nega com código de saída 2, e
+o Antigravity espera um JSON com `deny` ou `force_ask`. Manter dois conjuntos de travas deixaria as regras
+divergirem.
 
-## Decision
-Both hook configurations call the same script, `tools/guards/pre_tool_use.py`. `event.py` turns each tool's event
-into one neutral shape (`kind`, `path`, `command`, `cwd`) and renders the decision back in each protocol. Guards
-only see the neutral event. Skills and worker prompts follow the same idea: the source lives in `.agents/`, and
-`sync_adapters.py` generates the `.claude/` copies, which CI checks.
+## Decisão
+As duas configurações de hook chamam o mesmo script, `tools/guards/pre_tool_use.py`. O `event.py` transforma o
+evento de cada ferramenta num formato neutro (`kind`, `path`, `command`, `cwd`) e devolve a decisão no protocolo
+de cada uma. As travas só veem o evento neutro. Skills e prompts dos workers seguem a mesma ideia: a fonte mora
+em `.agents/`, e o `sync_adapters.py` gera as cópias de `.claude/`, que o CI confere.
 
-## Consequences
-- A new tool needs a mapping in `normalize()` and an output in `render()`, not new guards.
-- Antigravity's "Always Allow" would skip an `ask`, so the adapter emits `force_ask`.
-- Every decision is logged in one format, whatever tool made the call.
+## Consequências
+- Uma ferramenta nova pede um mapeamento em `normalize()` e uma saída em `render()`, não travas novas.
+- O «Always Allow» do Antigravity pularia um `ask`; por isso o adaptador emite `force_ask`.
+- Toda decisão é registrada num formato só, venha da ferramenta que vier.

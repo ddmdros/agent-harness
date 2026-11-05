@@ -1,21 +1,21 @@
-# 5. Decisions by inference go to a queue for approval
+# 5. Decisões por inferência vão para uma fila de aprovação
 
-Status: accepted
+Status: aceita
 
-## Context
-Agents make many small choices nobody asked for: a file format, a name, a threshold, what to leave out. In a
-chat these scroll away. When the human is away part of the time, they are never reviewed, and they quietly
-become the rules.
+## Contexto
+Os agentes fazem muitas escolhas pequenas que ninguém pediu: um formato de arquivo, um nome, um limite, o que
+deixar de fora. Numa conversa, elas somem na rolagem. Com o humano ausente parte do tempo, nunca são revisadas
+e viram regra sem ninguém ver.
 
-## Decision
-A *decision by inference* (a choice the agent made without being told, that outlives the session) is recorded
-at once with `tools/pending.py decision`, together with why it was made, where it applies and the alternatives
-that were left out. A question that did not block the work goes to a second queue with how to resolve it. At the
-end of a session the agent lists what it recorded and asks for approval. The human answers by id (`D003 ok`,
-`D004 change: ...`), and rejected or changed decisions are undone in that same session. Workers do not write to
-the queue: they list their decisions in their final answer, and the main agent records them.
+## Decisão
+Uma *decisão por inferência* (escolha que o agente fez sem ninguém dizer e que fica depois da sessão) é anotada
+na hora com `tools/pending.py decision`, com o porquê, onde se aplica e as alternativas descartadas. Uma dúvida
+que não bloqueou o trabalho vai para uma segunda fila, com o jeito de resolver. No fim da sessão, o agente lista
+o que anotou e pede aprovação. O humano responde pelo id (`D003 ok`, `D004 change: ...`), e o que for recusado ou
+mudado é desfeito na mesma sessão. Os workers não escrevem na fila: listam as decisões na resposta final, e o
+agente principal as anota.
 
-## Consequences
-- Writes go through one script with a lock file and an atomic replace, so parallel sessions never lose entries.
-  The queue folder is a `script` zone.
-- The queue is not a source of rules: an approved decision that becomes a rule moves to a rules file.
+## Consequências
+- A gravação passa por um único script, com trava de arquivo e troca atômica, então sessões paralelas não
+  perdem anotações. A pasta da fila é uma zona `script`.
+- A fila não é fonte de regra: a decisão aprovada que vira regra vai para um arquivo de regras.
