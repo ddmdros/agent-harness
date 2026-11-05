@@ -3,8 +3,9 @@
 Travas e infraestrutura para usar agentes de código (Claude Code e Google Antigravity) em trabalho real:
 **onde cada agente pode escrever, o que ele fez, o que decidiu sozinho e quanto custou.**
 
-É o núcleo genérico do harness privado que uso no meu trabalho de localização de jogos: vários agentes (um
-tradutor e revisores em paralelo) trabalhando sobre os arquivos de cada projeto. O projeto de demonstração deste
+É o núcleo genérico do harness privado que uso no meu trabalho de localização de jogos, só em projetos cujo
+contrato permite o uso da ferramenta: vários agentes (um tradutor e revisores em paralelo) trabalhando sobre os
+arquivos de cada projeto. O projeto de demonstração deste
 repositório é inventado: não há jogo, empresa ou produto real.
 
 Python 3.11+, só a biblioteca padrão. O código está em inglês; a documentação, em português.
