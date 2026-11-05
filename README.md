@@ -1,63 +1,61 @@
 # agent-harness
 
-Travas e infraestrutura para usar agentes de código (Claude Code e Google Antigravity) em trabalho real:
-**onde cada agente pode escrever, o que ele fez, o que decidiu sozinho e quanto custou.**
+Guards and infrastructure for using coding agents (Claude Code and Google Antigravity) on real work:
+**where each agent may write, what it did, what it decided on its own, and what it cost.**
 
-É o núcleo genérico do harness privado que uso no meu trabalho de localização de jogos, só em projetos cujo
-contrato permite o uso da ferramenta: vários agentes (um tradutor e revisores em paralelo) trabalhando sobre os
-arquivos de cada projeto. O projeto de demonstração deste
-repositório é inventado: não há jogo, empresa ou produto real.
+This is the generic core of the private harness I use in my game localization work, only on projects whose
+contract allows the tool: several agents (a translator and reviewers running in parallel) working on each
+project's files. The demo project in this repository is invented: there is no real game, company or product.
 
-Python 3.11+, só a biblioteca padrão. O código está em inglês; a documentação, em português.
+Python 3.11+, standard library only.
 
-## O problema
+## The problem
 
-Um agente com acesso ao terminal escreve em qualquer lugar. Num projeto com entregas de cliente, material de
-referência e registros, isso é um risco: alguns arquivos nunca podem mudar, outros só podem crescer, e outros
-só podem ser escritos por um script específico. Além disso:
+An agent with terminal access can write anywhere. In a project with client deliverables, reference material and
+logs, that is a risk: some files must never change, others may only grow, and others may only be written by one
+specific script. On top of that:
 
-- prompt não é trava: «nunca edite o glossário» no prompt é uma sugestão;
-- duas ferramentas (Claude Code e Antigravity) têm protocolos de hook diferentes para as mesmas regras;
-- com agentes rodando em loop e ninguém olhando, um pedido de confirmação trava tudo;
-- os agentes tomam pequenas decisões sozinhos (um nome de arquivo, um formato, o que deixar de fora) que
-  ninguém revisa;
-- para saber quanto custou uma rodada, é preciso contar os tokens de verdade, por agente, e não o número que o
-  subagente informa no fim.
+- a prompt is not a guard: "never edit the glossary" in a prompt is a suggestion;
+- two tools (Claude Code and Antigravity) have different hook protocols for the same rules;
+- with agents running in a loop and nobody watching, a confirmation prompt stalls everything;
+- agents make small decisions on their own (a file name, a format, what to leave out) that nobody reviews;
+- to know what a run cost, you have to count the real tokens, per agent, not the number the subagent reports at
+  the end.
 
-## O que tem aqui
+## What is here
 
-| Peça | Arquivo | O que faz |
+| Piece | File | What it does |
 |---|---|---|
-| Mapa de zonas de escrita | `.agents/tree.toml`, `tools/tree.py` | Cada caminho cai numa zona com um modo: `free`, `deliver`, `append`, `ask`, `script` ou `blocked`. O que está fora do mapa é bloqueado. |
-| Ponto de entrada do hook | `tools/guards/pre_tool_use.py`, `event.py` | Um só hook PreToolUse para as duas ferramentas: normaliza o evento de cada uma, roda as travas e responde no protocolo de cada uma. |
-| Trava da árvore | `tools/guards/tree_guard.py` | Aplica o mapa às ferramentas de arquivo e, no melhor esforço, aos comandos de terminal: redirecionamentos, `rm`/`mv`/`cp`/`sed -i`, cmdlets do PowerShell, sequências de `cd` e código Python em `-c` ou heredoc. |
-| Trava do git | `tools/guards/git_guard.py` | Nada de `--no-verify` nem `git add -f`; push só para repositório com visibilidade permitida (na dúvida, nega); nada de repositório público por acidente. |
-| Modo sem supervisão | `pre_tool_use.py` | Com `HARNESS_UNATTENDED=1`, todo «pedir confirmação» vira «negar» com instruções, e o loop não fica esperando alguém que não está lá. |
-| Registro de auditoria | `tools/audit_log.py` | Um JSONL por sessão, só de acréscimo: cada escrita e comando, os arquivos que ele atinge e a decisão da trava. Consulta por sessão ou por arquivo. |
-| Fila de decisões | `tools/pending.py` | O agente anota as decisões que tomou por inferência e as dúvidas que não o bloquearam; o humano aprova depois, pelo id. Trava de arquivo e troca atômica mantêm sessões paralelas seguras. |
-| Rodadas dos workers | `tools/runs.py` | Cada rodada de um worker é um arquivo novo com nome único, numa zona só de acréscimo: workers em paralelo e reexecuções nunca se sobrescrevem. |
-| Junção por regra fixa | `tools/merge_reviews.py` | Junta o tradutor e os revisores (em ordem de prioridade) com código, em vez de um juiz LLM, e mostra ao humano só os segmentos que precisam de decisão. |
-| Custo por agente | `tools/session_cost.py` | Lê os transcripts do Claude Code e soma entrada, cache e saída por agente e subagente. |
-| Uma fonte, duas ferramentas | `tools/sync_adapters.py` | Skills e prompts dos workers moram em `.agents/`; as cópias de que o Claude Code precisa em `.claude/` são geradas e conferidas no CI. |
+| Write-zone map | `.agents/tree.toml`, `tools/tree.py` | Every path falls into a zone with a mode: `free`, `deliver`, `append`, `ask`, `script` or `blocked`. Anything outside the map is blocked. |
+| Hook entry point | `tools/guards/pre_tool_use.py`, `event.py` | One PreToolUse hook for both tools: it normalizes each tool's event, runs the guards and answers in each tool's protocol. |
+| Tree guard | `tools/guards/tree_guard.py` | Applies the map to file tools and, on a best-effort basis, to terminal commands: redirections, `rm`/`mv`/`cp`/`sed -i`, PowerShell cmdlets, `cd` sequences and Python code in `-c` or a heredoc. |
+| Git guard | `tools/guards/git_guard.py` | No `--no-verify` and no `git add -f`; push only to a repository whose visibility is allowed (when in doubt, deny); no public repository by accident. |
+| Unattended mode | `pre_tool_use.py` | With `HARNESS_UNATTENDED=1`, every "ask" becomes a "deny" with instructions, so the loop does not wait for someone who is not there. |
+| Audit log | `tools/audit_log.py` | One append-only JSONL per session: every write and command, the files it touches and the guard's decision. Query by session or by file. |
+| Decision queue | `tools/pending.py` | The agent records the decisions it made by inference and the questions that did not block it; the human approves later, by id. A file lock and an atomic replace keep parallel sessions safe. |
+| Worker runs | `tools/runs.py` | Each worker run is a new file with a unique name, in an append-only zone: parallel workers and reruns never overwrite each other. |
+| Fixed merge rule | `tools/merge_reviews.py` | Merges the translator and the reviewers (in priority order) in code, instead of an LLM judge, and shows the human only the segments that need a decision. |
+| Cost per agent | `tools/session_cost.py` | Reads Claude Code transcripts and sums input, cache and output per agent and subagent. |
+| One source, two tools | `tools/sync_adapters.py` | Skills and worker prompts live in `.agents/`; the copies Claude Code needs in `.claude/` are generated and checked in CI. |
 
-## Como uma escrita é decidida
+## How a write is decided
 
 ```mermaid
 flowchart LR
-    A[Chamada de ferramenta do agente] --> B[Casca do hook<br/>.claude/settings.json<br/>.agents/hooks.json]
+    A[Agent tool call] --> B[Hook shell<br/>.claude/settings.json<br/>.agents/hooks.json]
     B --> C[pre_tool_use.py]
     C --> D[event.normalize]
     D --> E[tree_guard]
     D --> F[git_guard]
-    E --> G{decisão mais forte<br/>negar > pedir > seguir}
+    E --> G{strongest decision<br/>deny > ask > allow}
     F --> G
-    G -->|sem supervisão| H[pedir vira negar]
+    G -->|unattended| H[ask becomes deny]
     G --> I[audit_log.record]
     H --> I
-    I --> J[event.emit<br/>no protocolo da ferramenta]
+    I --> J[event.emit<br/>in the tool's protocol]
 ```
 
-O mapa é a fonte única: a trava, o comando `check` e os testes leem o mesmo arquivo.
+The map is the single source: the guard, the `check` command and the tests read the same file.
 
 ```toml
 [[zone]]
@@ -66,7 +64,7 @@ mode = "blocked"
 note = "Reference material from the client: read-only."
 
 [[zone]]
-path = "projects/*/references/glossary.csv"   # vale a última zona que casa
+path = "projects/*/references/glossary.csv"   # the last matching zone wins
 mode = "ask"
 
 [[zone]]
@@ -75,75 +73,75 @@ mode = "append"
 note = "Worker output, one file per run: two runs never overwrite each other."
 ```
 
-## Para testar
+## Try it
 
 ```bash
 git clone https://github.com/ddmdros/agent-harness && cd agent-harness
 
-# Em que zona está um caminho?
+# Which zone is a path in?
 python -I tools/tree.py where projects/sample-rpg/references/glossary.csv
 
-# Mandar um evento para o hook, como o Claude Code faria
+# Send an event to the hook, as Claude Code would
 echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf projects/sample-rpg/references"}}' \
   | python -I tools/guards/pre_tool_use.py; echo "exit $?"
 # -> BLOCKED by the write-zone map: ... (blocked) ... exit 2
 
-# Juntar o job de demonstração: um tradutor e dois revisores, já rodados
+# Merge the demo job: one translator and two reviewers, already run
 python -I tools/merge_reviews.py projects/sample-rpg/jobs/2026-11-patch/wip
 # -> 5 segments, 2 changed by review, 2 need the human
 
-# Anotar uma decisão que o agente tomou sozinho e depois aprovar
-python -I tools/pending.py decision "Rodadas se chamam <hora>-<sessão>-<worker>.json" --why "ordenável e único"
+# Record a decision the agent made on its own, then approve it
+python -I tools/pending.py decision "Runs are named <time>-<session>-<worker>.json" --why "sortable and unique"
 python -I tools/pending.py answer D001 ok
 
-# Testes
+# Tests
 python -I -m unittest discover -s tests -v
 ```
 
-Para usar no seu projeto, copie `tools/`, `.agents/tree.toml` e as duas cascas de hook e escreva as suas
-zonas. Ao abrir a pasta no Claude Code ou no Antigravity, os hooks já estão ativos.
+To use it in your own project, copy `tools/`, `.agents/tree.toml` and the two hook shells, and write your own
+zones. When you open the folder in Claude Code or Antigravity, the hooks are already active.
 
-## O job de demonstração
+## The demo job
 
-`projects/sample-rpg/jobs/2026-11-patch/` tem um job pequeno de EN para PT-BR com a saída de três workers
-(`.agents/workers/`): um tradutor, um revisor de mecânica (glossário, placeholders, tamanho) e um revisor de
-estilo. A junção mostra a regra em ação:
+`projects/sample-rpg/jobs/2026-11-patch/` holds a small EN to PT-BR job with the output of three workers
+(`.agents/workers/`): a translator, a mechanics reviewer (glossary, placeholders, length) and a style reviewer.
+The merge shows the rule at work:
 
-- `ui_002`: os dois revisores mudaram o rascunho. O de mecânica vence pela prioridade (o glossário diz
-  *Stamina = Vigor*), e a proposta de estilo fica como alternativa, com aviso.
-- `dlg_001`: o revisor de estilo escala uma saudação com gênero. O texto não muda, e quem decide é o humano.
-- `dlg_003`: uma mudança só de estilo é aplicada, e o rascunho fica como alternativa.
+- `ui_002`: both reviewers changed the draft. The mechanics reviewer wins on priority (the glossary says
+  *Stamina = Vigor*), and the style proposal stays as an alternative, with a warning.
+- `dlg_001`: the style reviewer escalates a gendered greeting. The text does not change, and the human decides.
+- `dlg_003`: a style-only change is applied, and the draft stays as an alternative.
 
-## Decisões de projeto
+## Design decisions
 
-O porquê de cada peça está em [`docs/decisions/`](docs/decisions/), resumido dos registros de decisão de
-arquitetura (ADRs) do harness de produção:
+The reasoning behind each piece is in [`docs/decisions/`](docs/decisions/), condensed from the architecture
+decision records (ADRs) of the production harness:
 
-1. [Hooks garantem, prompts explicam](docs/decisions/0001-hooks-enforce-prompts-inform.md)
-2. [Um mapa de zonas de escrita: vale a última zona, o resto é bloqueado](docs/decisions/0002-write-zone-map.md)
-3. [Um ponto de entrada para todas as ferramentas](docs/decisions/0003-one-entry-point-for-every-tool.md)
-4. [Sem supervisão, «pedir» vira «negar»](docs/decisions/0004-unattended-mode.md)
-5. [Decisões por inferência vão para uma fila de aprovação](docs/decisions/0005-decision-queue.md)
-6. [Uma regra fixa de junção no lugar de um juiz LLM](docs/decisions/0006-fixed-merge-rule.md)
+1. [Hooks enforce, prompts inform](docs/decisions/0001-hooks-enforce-prompts-inform.md)
+2. [A write-zone map: the last zone wins, everything else is blocked](docs/decisions/0002-write-zone-map.md)
+3. [One entry point for every tool](docs/decisions/0003-one-entry-point-for-every-tool.md)
+4. [Unattended, "ask" becomes "deny"](docs/decisions/0004-unattended-mode.md)
+5. [Decisions made by inference go to an approval queue](docs/decisions/0005-decision-queue.md)
+6. [A fixed merge rule instead of an LLM judge](docs/decisions/0006-fixed-merge-rule.md)
 
-## Confidencialidade
+## Confidentiality
 
-Este repositório não tem nenhum dado de trabalho real: o código é só o núcleo genérico, a demo é inventada, e os
-registros de decisão foram reescritos sem nada de cliente.
+This repository holds no data from real work: the code is only the generic core, the demo is invented, and the
+decision records were rewritten without anything from a client.
 
-## Limites
+## Limits
 
-- A trava do terminal lê o **texto** do comando. Caminhos montados em tempo de execução
-  (`open(sys.argv[1], 'w')`, `rm $f`) não são resolvidos. Quando uma escrita em Python não tem alvo legível, a
-  trava volta para uma regra mais estrita. É um cinto de segurança forte, não uma sandbox: quando o risco é alto,
-  use junto com permissões do sistema operacional.
-- Ela erra para o lado seguro: uma mensagem de commit que cita `--no-verify` é negada
-  (ver `tests/test_git_guard.py`).
-- O `session_cost.py` só lê transcripts do Claude Code. O número «equivalente» serve para comparar rodadas; não
-  é preço.
-- Ainda não está confirmado em que campo o evento de hook do Antigravity traz o id da sessão. O registro tenta
-  os nomes prováveis e, sem nenhum, usa o id do processo pai.
+- The terminal guard reads the **text** of the command. Paths built at run time (`open(sys.argv[1], 'w')`,
+  `rm $f`) are not resolved. When a Python write has no readable target, the guard falls back to a stricter rule.
+  It is a strong seatbelt, not a sandbox: when the risk is high, use it together with operating-system
+  permissions.
+- It errs on the safe side: a commit message that mentions `--no-verify` is denied (see
+  `tests/test_git_guard.py`).
+- `session_cost.py` only reads Claude Code transcripts. The "equivalent" figure is for comparing runs; it is not
+  a price.
+- It is not yet confirmed which field of the Antigravity hook event carries the session id. The log tries the
+  likely names and, failing all of them, uses the parent process id.
 
-## Licença
+## License
 
-MIT. Veja [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

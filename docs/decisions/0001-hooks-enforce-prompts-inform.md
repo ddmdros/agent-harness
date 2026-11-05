@@ -1,22 +1,21 @@
-# 1. Hooks garantem, prompts explicam
+# 1. Hooks enforce, prompts inform
 
-Status: aceita
+Status: accepted
 
-## Contexto
-A primeira versão do harness dependia dos arquivos de instrução e das regras de permissão da própria
-ferramenta. Dois problemas apareceram no trabalho real. Os agentes deixavam arquivos descartáveis na raiz do
-repositório (`out.txt`, `diff_output.txt`, pastas `_tmp_extract/` com scripts avulsos), mesmo com a regra
-dizendo onde ficam os rascunhos. E as regras de permissão que protegiam as pastas de referência só cobriam as
-ferramentas Edit e Write: um `rm`, um `cp` ou um script Python curto no terminal passavam direto.
+## Context
+The first version of the harness relied on instruction files and the tool's own permission rules. Two problems
+showed up in real work. Agents left throwaway files at the repository root (`out.txt`, `diff_output.txt`,
+`_tmp_extract/` folders with loose scripts), even though the rules said where scratch files go. And the
+permission rules that protected the reference folders only covered the Edit and Write tools: an `rm`, a `cp` or a
+short Python script in the terminal went straight through.
 
-## Decisão
-Toda regra que protege um arquivo é garantida por um hook PreToolUse, em código, antes de a ferramenta rodar.
-Os prompts continuam explicando as regras, porque o agente que sabe o porquê erra menos, mas o prompt deixou de
-ser a proteção. Cada negação diz o motivo e o que fazer (`tools/tree.py where <caminho>`), para o agente se
-recuperar.
+## Decision
+Every rule that protects a file is enforced by a PreToolUse hook, in code, before the tool runs. Prompts still
+explain the rules, because an agent that knows why makes fewer mistakes, but the prompt is no longer the
+protection. Every denial gives the reason and what to do (`tools/tree.py where <path>`), so the agent can recover.
 
-## Consequências
-- As regras são testáveis: `tests/test_tree_guard.py` tem 60 casos, da escrita simples ao heredoc em Python.
-- A trava do terminal é melhor esforço sobre o texto do comando; por isso os limites estão documentados e ela
-  erra para o lado seguro.
-- Afrouxar uma trava também é vigiado: `tools/guards/**` é uma zona `ask`.
+## Consequences
+- The rules are testable: `tests/test_tree_guard.py` has 60 cases, from a plain write to a Python heredoc.
+- The terminal guard is best effort over the command text; that is why its limits are documented and it errs on
+  the safe side.
+- Loosening a guard is watched too: `tools/guards/**` is an `ask` zone.

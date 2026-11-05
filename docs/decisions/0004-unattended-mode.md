@@ -1,16 +1,16 @@
-# 4. Sem supervisão, «pedir» vira «negar»
+# 4. Unattended, "ask" becomes "deny"
 
-Status: aceita
+Status: accepted
 
-## Contexto
-O loop de tradução roda um tradutor e revisores sem ninguém olhando. Toda decisão `ask` abria um pedido de
-confirmação que ninguém respondia, e o loop inteiro parava até alguém voltar.
+## Context
+The translation loop runs a translator and reviewers with nobody watching. Every `ask` decision opened a
+confirmation prompt that nobody answered, and the whole loop stopped until someone came back.
 
-## Decisão
-Com `HARNESS_UNATTENDED=1`, ou com o arquivo `.scratch/unattended` criado pelo orquestrador, o ponto de entrada
-transforma todo `ask` em `deny`. O motivo diz ao agente para não procurar outro caminho, anotar a escrita
-bloqueada como dúvida (`tools/pending.py question`) e seguir sem ela.
+## Decision
+With `HARNESS_UNATTENDED=1`, or with the `.scratch/unattended` file created by the orchestrator, the entry point
+turns every `ask` into `deny`. The reason tells the agent not to look for another route, to record the blocked
+write as a question (`tools/pending.py question`) and to carry on without it.
 
-## Consequências
-- O modo sem supervisão só deixa as travas mais estritas; por isso qualquer agente pode ligá-lo.
-- O que precisava de aprovação não se perde: fica esperando na fila quando o humano volta.
+## Consequences
+- Unattended mode only makes the guards stricter; that is why any agent may turn it on.
+- What needed approval is not lost: it waits in the queue for when the human comes back.

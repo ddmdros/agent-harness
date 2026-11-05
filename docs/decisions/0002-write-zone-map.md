@@ -1,29 +1,31 @@
-# 2. Um mapa de zonas de escrita: vale a última zona, o resto é bloqueado
+# 2. A write-zone map: the last zone wins, everything else is blocked
 
-Status: aceita
+Status: accepted
 
-## Contexto
-As regras de proteção tinham virado listas separadas dentro de cada trava: referências protegidas, bancos
-protegidos, pastas geradas. Uma pasta nova exigia mexer em código em vários lugares, e nada dizia ao agente
-onde um arquivo novo *podia* ficar.
+## Context
+The protection rules had turned into separate lists inside each guard: protected references, protected
+databases, generated folders. A new folder meant changing code in several places, and nothing told the agent
+where a new file *could* go.
 
-## Decisão
-Um mapa em TOML (`.agents/tree.toml`) dá a cada caminho um de seis modos:
+## Decision
+A TOML map (`.agents/tree.toml`) gives every path one of six modes:
 
-| Modo | Arquivo novo | Arquivo existente |
+| Mode | New file | Existing file |
 |---|---|---|
-| `free` | segue | segue |
-| `deliver` | segue | pede confirmação |
-| `append` | segue | nega |
-| `ask` | pede confirmação | pede confirmação |
-| `script` | só a ferramenta de `by` | só a ferramenta de `by` |
-| `blocked` | nega | nega |
+| `free` | allow | allow |
+| `deliver` | allow | ask |
+| `append` | allow | deny |
+| `ask` | ask | ask |
+| `script` | only the tool in `by` | only the tool in `by` |
+| `blocked` | deny | deny |
 
-Os globs são lidos em ordem e vale a **última** zona que casa, então o mapa vai da regra geral para a exceção
-(`references/**` bloqueado e, depois, `references/glossary.csv` com confirmação). O que nenhuma zona cobre cai
-no `default`, que é `blocked`: pasta nova exige zona nova, aprovada por um humano.
+Globs are read in order and the **last** matching zone wins, so the map goes from the general rule to the
+exception (`references/**` blocked, then `references/glossary.csv` with confirmation). Whatever no zone covers
+falls to the `default`, which is `blocked`: a new folder needs a new zone, approved by a human.
 
-## Consequências
-- A trava, o `tools/tree.py check` (que lista o que existe no disco fora do mapa) e os testes leem o mesmo arquivo.
-- O modo `append` protege registros e saídas de worker contra os agentes sem nenhum código extra.
-- O modo `script` dá a um gerador a posse da sua saída: `.claude/skills/**` só é escrito pelo `sync_adapters.py`.
+## Consequences
+- The guard, `tools/tree.py check` (which lists what exists on disk outside the map) and the tests read the same
+  file.
+- The `append` mode protects logs and worker output from the agents with no extra code.
+- The `script` mode gives a generator ownership of its output: `.claude/skills/**` is written only by
+  `sync_adapters.py`.
