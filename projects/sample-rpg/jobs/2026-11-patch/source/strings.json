@@ -1,0 +1,10 @@
+{
+  "language": "en",
+  "segments": [
+    {"id": "ui_001", "text": "Open Quest Log", "max_chars": 24},
+    {"id": "ui_002", "text": "Not enough Stamina", "max_chars": 24},
+    {"id": "dlg_001", "text": "Welcome back to the Guild Hall, {player}!"},
+    {"id": "dlg_002", "text": "Bring me 3 Ember Shards and I'll forge you a blade."},
+    {"id": "dlg_003", "text": "The road is long, Wayfarer. Rest while you can."}
+  ]
+}

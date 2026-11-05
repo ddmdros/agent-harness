@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.scratch/
+.audit/
+queue/*.lock
+queue/*.tmp

@@ -1,0 +1,130 @@
+# Write-zone map: where each agent may write, and how. One source for the guard (tools/guards/tree_guard.py),
+# tools/tree.py and the tests. It applies to every agent and every model.
+# Query: python -I tools/tree.py where <path>   |   Check the disk: python -I tools/tree.py check
+#
+# Reading the map:
+# - Paths are relative to the repository root, case-insensitive, always with "/".
+# - "*" matches one name (no "/"); "**" matches zero or more folders; "{a,b}" matches a or b.
+# - The LAST matching zone wins: write from the general rule to the specific one.
+# - Reading is never blocked. The map only governs writes (create, edit, overwrite, delete, move).
+#
+# Modes:
+#   free     write, edit and delete freely
+#   deliver  a new file is free; changing an existing file asks the human
+#   append   a new file is free; an existing file never changes or disappears (logs, worker output)
+#   ask      every write asks the human
+#   script   only the tool named in `by` writes here; by hand, denied
+#   blocked  nobody writes
+# Anything no zone covers falls into `default`. A new folder means a new zone here, approved by the human.
+
+default = "blocked"
+
+[git]
+# Push only to repositories whose GitHub visibility is listed. The private production repository this harness
+# comes from uses ["PRIVATE"]; this showcase repository is public, so it allows both.
+allowed_visibility = ["PRIVATE", "PUBLIC"]
+
+[tree_guard]
+# Tools whose `build` subcommand regenerates a .db file: running it asks the human first.
+db_builders = ["tm_index"]
+
+# ---------------------------------------------------------------- root and harness
+
+[[zone]]
+path = "{AGENTS.md,CLAUDE.md,README.md,LICENSE}"
+mode = "free"
+note = "The only loose files allowed at the root."
+
+[[zone]]
+path = "{.gitignore,.github/**}"
+mode = "ask"
+note = "They decide what enters git and what CI checks."
+
+[[zone]]
+path = ".agents/**"
+mode = "free"
+note = "Source of skills and workers. After changing them, run tools/sync_adapters.py."
+
+[[zone]]
+path = "{.agents/tree.toml,.agents/hooks.json}"
+mode = "ask"
+note = "This map and the Antigravity hook shell: changing them changes what the guard allows."
+
+[[zone]]
+path = ".claude/{skills,agents}/**"
+mode = "script"
+by = "tools/sync_adapters.py"
+note = "Generated copies of .agents/."
+
+[[zone]]
+path = ".claude/{settings.json,settings.local.json}"
+mode = "ask"
+note = "Claude Code hook shell and permissions."
+
+[[zone]]
+path = "{docs,tools,tests}/**"
+mode = "free"
+note = "Harness code, tests and docs."
+
+[[zone]]
+path = "tools/guards/**"
+mode = "ask"
+note = "The guards themselves: an agent never loosens a guard without the human seeing it."
+
+[[zone]]
+path = "queue/**"
+mode = "script"
+by = "tools/pending.py"
+note = "Decisions and questions waiting for the human: only through tools/pending.py."
+
+[[zone]]
+path = ".audit/**"
+mode = "append"
+note = "Audit log, one file per session (tools/audit_log.py): nobody edits or deletes a line."
+
+[[zone]]
+path = "{.scratch,**/__pycache__}/**"
+mode = "free"
+note = "Scratch space and Python cache."
+
+# ---------------------------------------------------------------- projects (demo: synthetic data)
+
+[[zone]]
+path = "projects/*/{README.md,AGENTS.md,CLAUDE.md}"
+mode = "free"
+note = "Project rules."
+
+[[zone]]
+path = "projects/*/references/**"
+mode = "blocked"
+note = "Reference material from the client (style guide, previous translations): read-only."
+
+[[zone]]
+path = "projects/*/references/glossary.csv"
+mode = "ask"
+note = "The glossary may grow, but only with the human's approval."
+
+[[zone]]
+path = "projects/*/db/**"
+mode = "ask"
+note = "Databases built from the references (translation memory index)."
+
+[[zone]]
+path = "projects/*/jobs/*/source/**"
+mode = "blocked"
+note = "Source files as received: never changed."
+
+[[zone]]
+path = "projects/*/jobs/*/output/**"
+mode = "deliver"
+note = "What goes back to the client: a new file is free, overwriting a delivered file asks."
+
+[[zone]]
+path = "projects/*/jobs/*/wip/**"
+mode = "free"
+note = "Work in progress of the job."
+
+[[zone]]
+path = "projects/*/jobs/*/wip/runs/**"
+mode = "append"
+note = "Worker output, one file per run (tools/runs.py): two runs never overwrite each other."

@@ -1,0 +1,9 @@
+{
+  "segments": [
+    {"id": "ui_001", "verdict": "keep"},
+    {"id": "ui_002", "verdict": "change", "proposal": "Vigor insuficiente", "reason": "Glossary: Stamina = Vigor; «Estamina» is forbidden."},
+    {"id": "dlg_001", "verdict": "keep"},
+    {"id": "dlg_002", "verdict": "keep"},
+    {"id": "dlg_003", "verdict": "keep"}
+  ]
+}

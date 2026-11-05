@@ -1,0 +1,72 @@
+{
+ "summary": {
+  "segments": 5,
+  "changed_by_review": 2,
+  "need_human": 2
+ },
+ "segments": [
+  {
+   "id": "ui_001",
+   "text": "Abrir Diário de Missões",
+   "origin": "drafter",
+   "alternatives": [],
+   "warnings": []
+  },
+  {
+   "id": "ui_002",
+   "text": "Vigor insuficiente",
+   "origin": "mechanics-reviewer",
+   "alternatives": [
+    {
+     "from": "drafter",
+     "text": "Estamina insuficiente",
+     "note": "Direct rendering."
+    },
+    {
+     "from": "style-reviewer",
+     "text": "Sem estamina",
+     "note": "Shorter."
+    }
+   ],
+   "warnings": [
+    "2 reviewers changed this segment; mechanics-reviewer wins by priority. Check the other proposals."
+   ]
+  },
+  {
+   "id": "dlg_001",
+   "text": "Bem-vindo de volta à Sede da Guilda, {player}!",
+   "origin": "drafter",
+   "alternatives": [
+    {
+     "from": "drafter",
+     "text": "Que bom te ver de novo na Sede da Guilda, {player}!",
+     "note": "warmer"
+    }
+   ],
+   "warnings": [
+    "style-reviewer asks for your decision: Gender-neutral greeting avoids assuming the player's gender.",
+    "drafter: Gender of {player} is unknown: «Bem-vindo» assumes masculine."
+   ]
+  },
+  {
+   "id": "dlg_002",
+   "text": "Me traga 3 Fragmentos de Brasa e eu forjo uma lâmina para você.",
+   "origin": "drafter",
+   "alternatives": [],
+   "warnings": []
+  },
+  {
+   "id": "dlg_003",
+   "text": "A estrada é longa, Andarilho. Descanse enquanto pode.",
+   "origin": "style-reviewer",
+   "alternatives": [
+    {
+     "from": "drafter",
+     "text": "A estrada é longa, Andarilho. Descanse enquanto você pode.",
+     "note": ""
+    }
+   ],
+   "warnings": []
+  }
+ ]
+}

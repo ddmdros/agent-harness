@@ -1,0 +1,12 @@
+{
+  "agent-harness-guards": {
+    "PreToolUse": [
+      {"matcher": "run_command", "hooks": [{"type": "command", "command": "python -I ../tools/guards/pre_tool_use.py", "timeout": 30}]},
+      {"matcher": "write_to_file", "hooks": [{"type": "command", "command": "python -I ../tools/guards/pre_tool_use.py", "timeout": 30}]},
+      {"matcher": "write_file", "hooks": [{"type": "command", "command": "python -I ../tools/guards/pre_tool_use.py", "timeout": 30}]},
+      {"matcher": "replace_file_content", "hooks": [{"type": "command", "command": "python -I ../tools/guards/pre_tool_use.py", "timeout": 30}]},
+      {"matcher": "multi_replace_file_content", "hooks": [{"type": "command", "command": "python -I ../tools/guards/pre_tool_use.py", "timeout": 30}]},
+      {"matcher": "edit_file", "hooks": [{"type": "command", "command": "python -I ../tools/guards/pre_tool_use.py", "timeout": 30}]}
+    ]
+  }
+}

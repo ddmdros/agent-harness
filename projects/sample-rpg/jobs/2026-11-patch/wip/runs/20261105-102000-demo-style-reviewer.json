@@ -1,0 +1,9 @@
+{
+  "segments": [
+    {"id": "ui_001", "verdict": "keep"},
+    {"id": "ui_002", "verdict": "change", "proposal": "Sem estamina", "reason": "Shorter."},
+    {"id": "dlg_001", "verdict": "escalate", "proposal": "Que bom te ver de novo na Sede da Guilda, {player}!", "reason": "Gender-neutral greeting avoids assuming the player's gender."},
+    {"id": "dlg_002", "verdict": "keep"},
+    {"id": "dlg_003", "verdict": "change", "proposal": "A estrada é longa, Andarilho. Descanse enquanto pode.", "reason": "Drop the redundant «você»."}
+  ]
+}

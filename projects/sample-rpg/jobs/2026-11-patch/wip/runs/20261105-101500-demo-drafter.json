@@ -1,0 +1,11 @@
+{
+  "segments": [
+    {"id": "ui_001", "text": "Abrir Diário de Missões", "reasoning": "Glossary term for the menu."},
+    {"id": "ui_002", "text": "Estamina insuficiente", "reasoning": "Direct rendering."},
+    {"id": "dlg_001", "text": "Bem-vindo de volta à Sede da Guilda, {player}!",
+     "alternatives": [{"text": "Que bom te ver de novo na Sede da Guilda, {player}!", "note": "warmer"}],
+     "important": "Gender of {player} is unknown: «Bem-vindo» assumes masculine."},
+    {"id": "dlg_002", "text": "Me traga 3 Fragmentos de Brasa e eu forjo uma lâmina para você."},
+    {"id": "dlg_003", "text": "A estrada é longa, Andarilho. Descanse enquanto você pode."}
+  ]
+}
