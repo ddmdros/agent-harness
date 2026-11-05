@@ -3,7 +3,7 @@
 Travas e infraestrutura para usar agentes de código (Claude Code e Google Antigravity) em trabalho real:
 **onde cada agente pode escrever, o que ele fez, o que decidiu sozinho e quanto custou.**
 
-É o núcleo genérico de um harness privado que uso em produção na localização de jogos, com vários agentes
+É o núcleo genérico de um harness privado que uso em produção na localização de jogos de clientes que permitem uso de IA no processo. Ele é composto por vários agentes
 (um tradutor e revisores em paralelo) trabalhando sobre arquivos de cliente. Tudo o que é do cliente ficou de
 fora. O projeto de demonstração deste repositório é inventado: não há jogo, cliente ou produto real.
 
