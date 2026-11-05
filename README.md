@@ -128,8 +128,8 @@ arquitetura (ADRs) do harness de produção:
 
 ## Confidencialidade
 
-Este repositório não tem nenhum dado de trabalho real: o código é só o núcleo genérico, e a demo e os registros
-de decisão foram escritos com conteúdo inventado.
+Este repositório não tem nenhum dado de trabalho real: o código é só o núcleo genérico, a demo é inventada, e os
+registros de decisão foram reescritos sem nada de cliente.
 
 ## Limites
 
