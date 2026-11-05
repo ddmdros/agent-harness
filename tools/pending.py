@@ -49,7 +49,9 @@ class _Lock:
             try:
                 os.close(os.open(self.lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL))
                 return self
-            except FileExistsError:
+            except (FileExistsError, PermissionError):
+                # Windows: a lock file that was just deleted stays "delete pending" for a moment, and creating it
+                # again raises PermissionError instead of FileExistsError. Both mean "busy, try again".
                 try:
                     if time.time() - self.lock.stat().st_mtime > self.stale_after:  # forgotten lock
                         self.lock.unlink()
@@ -77,7 +79,14 @@ def _write(kind, data, path=None):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(f".{os.getpid()}.tmp")
     tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    os.replace(tmp, path)
+    for attempt in range(20):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:  # Windows: the target is open in another process (a reader); retry briefly
+            if attempt == 19:
+                raise
+            time.sleep(0.05)
 
 
 def _record(kind, fields, path=None):

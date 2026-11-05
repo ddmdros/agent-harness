@@ -44,12 +44,20 @@ class PendingTest(unittest.TestCase):
         self.assertEqual([i["id"] for i in p.open_items("D", session="abc", path=self.D)], ["D001"])
 
     def test_parallel_writers_lose_nothing(self):
-        threads = [threading.Thread(target=p.record_decision, args=(f"d{i}", "w"), kwargs={"path": self.D})
-                   for i in range(20)]
+        errors = []
+
+        def write(i):
+            try:
+                p.record_decision(f"d{i}", "w", path=self.D)
+            except Exception as e:  # a thread's exception would otherwise vanish
+                errors.append(repr(e))
+
+        threads = [threading.Thread(target=write, args=(i,)) for i in range(20)]
         for t in threads:
             t.start()
         for t in threads:
             t.join()
+        self.assertEqual(errors, [])
         ids = [i["id"] for i in json.loads(self.D.read_text(encoding="utf-8"))["decisions"]]
         self.assertEqual(sorted(ids), [f"D{n:03d}" for n in range(1, 21)])
         self.assertFalse(any(self.tmp.glob("*.lock")))
