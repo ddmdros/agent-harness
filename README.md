@@ -1,17 +1,17 @@
 # agent-harness
 
-Guards and infrastructure for using coding agents (Claude Code and Google Antigravity) on real work:
+Guards and infrastructure for coding agents (Claude Code and Google Antigravity) that work on a project's files:
 **where each agent may write, what it did, what it decided on its own, and what it cost.**
 
-This is the generic core of the private harness I use in my game localization work, only on projects whose
-contract allows the tool: several agents (a translator and reviewers running in parallel) working on each
-project's files. The demo project in this repository is invented: there is no real game, company or product.
+It is built around a game translation workflow: several agents (a drafter and reviewers running in parallel) work
+on each project's files, and a person decides what needs judgment. The demo project in this repository,
+`projects/sample-rpg`, is invented: there is no real game, company or product.
 
 Python 3.11+, standard library only.
 
 ## The problem
 
-An agent with terminal access can write anywhere. In a project with client deliverables, reference material and
+An agent with terminal access can write anywhere. In a project with deliverables, reference material and
 logs, that is a risk: some files must never change, others may only grow, and others may only be written by one
 specific script. On top of that:
 
@@ -114,8 +114,8 @@ The merge shows the rule at work:
 
 ## Design decisions
 
-The reasoning behind each piece is in [`docs/decisions/`](docs/decisions/), condensed from the architecture
-decision records (ADRs) of the production harness:
+The reasoning behind each piece is in [`docs/decisions/`](docs/decisions/), written as architecture decision
+records (ADRs):
 
 1. [Hooks enforce, prompts inform](docs/decisions/0001-hooks-enforce-prompts-inform.md)
 2. [A write-zone map: the last zone wins, everything else is blocked](docs/decisions/0002-write-zone-map.md)
@@ -124,10 +124,10 @@ decision records (ADRs) of the production harness:
 5. [Decisions made by inference go to an approval queue](docs/decisions/0005-decision-queue.md)
 6. [A fixed merge rule instead of an LLM judge](docs/decisions/0006-fixed-merge-rule.md)
 
-## Confidentiality
+## Demo data
 
-This repository holds no data from real work: the code is only the generic core, the demo is invented, and the
-decision records were rewritten without anything from a client.
+Everything in `projects/sample-rpg` is invented for the demo: the strings, the glossary and the reviews. The
+repository holds no data from any other project.
 
 ## Limits
 

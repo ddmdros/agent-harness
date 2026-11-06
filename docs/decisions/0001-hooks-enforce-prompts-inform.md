@@ -4,7 +4,7 @@ Status: accepted
 
 ## Context
 The first version of the harness relied on instruction files and the tool's own permission rules. Two problems
-showed up in real work. Agents left throwaway files at the repository root (`out.txt`, `diff_output.txt`,
+showed up in use. Agents left throwaway files at the repository root (`out.txt`, `diff_output.txt`,
 `_tmp_extract/` folders with loose scripts), even though the rules said where scratch files go. And the
 permission rules that protected the reference folders only covered the Edit and Write tools: an `rm`, a `cp` or a
 short Python script in the terminal went straight through.
